@@ -789,6 +789,13 @@ function fitFrame(){
     fe.style.left = '0'; fe.style.marginLeft = left + 'px';
     const h = Math.ceil(document.documentElement.getBoundingClientRect().height);
     if (Math.abs(fe.offsetHeight - h) > 2) { fe.style.height = h + 'px'; fe.setAttribute('height', h); }
+    /* Newer Streamlit versions wrap the frame in a container fixed at the initial height; grow it too,
+       otherwise the content below (chat, footer) is drawn on top of the website. */
+    const holder = fe.closest('[data-testid="stElementContainer"], .element-container, [data-testid="element-container"]');
+    if (holder && Math.abs(holder.offsetHeight - h) > 2) {
+      holder.style.setProperty('height', h + 'px', 'important');
+      holder.style.setProperty('min-height', h + 'px', 'important');
+    }
   } catch (e) {}
 }
 if (window.ResizeObserver) new ResizeObserver(fitFrame).observe(document.documentElement);
