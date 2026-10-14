@@ -1,0 +1,6 @@
+# Local secrets (logging URL/token) — set these in Streamlit Cloud > Settings > Secrets instead
+.streamlit/secrets.toml
+__pycache__/
+
+# Form submissions being reviewed (contain contributor emails) — never commit
+dataset_submissions/pending/

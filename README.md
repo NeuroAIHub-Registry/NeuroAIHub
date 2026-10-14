@@ -1,6 +1,6 @@
 # 🤖🧠 **NeuroAIHub**
 
-**NeuroAIHub** is an AI-driven framework designed to make **neuroradiology dataset discovery** easier, smarter, and always up to date. At its core, it maintains a **continuously updated database** of neuroradiology datasets enriched through an **AI-driven updating pipeline**,  ensuring that new datasets are identified, integrated, and the database is kept up to date with minimal manual effort. Researchers can explore this database either through an **intuitive interactive interface** or by **chatting directly with an AI agent** that understands natural-language questions and retrieves exactly the information they need. Whether you're a **clinician**, **scientist**, or **AI developer**, NeuroAIHub helps you find the right datasets—**quickly, accurately, and effortlessly**. 🚀
+**NeuroAIHub** is an AI-driven framework designed to make **neuroradiology dataset discovery** easier, smarter, and always up to date. At its core, it maintains a **curated, continuously updated database** of public neuroradiology datasets, reviewed and expanded by the NeuroAIHub team and community. Researchers can explore this database either through an **intuitive interactive interface** or by **chatting directly with an AI agent** that understands natural-language questions and retrieves exactly the information they need. Whether you're a **clinician**, **scientist**, or **AI developer**, NeuroAIHub helps you find the right datasets—**quickly, accurately, and effortlessly**. 🚀
 
 ---
 
@@ -14,15 +14,13 @@ Watch the demo here:
 
 # 🎯 **Key Features**
 
-• **Comprehensive Neuroradiology Dataset Database:** A centrally curated foundational database containing dataset information from six major neuroradiology domains. These entries were initially extracted using a multi-reviewer approach to ensure accuracy, completeness, and consistency. This foundational database is then continuously expanded and maintained through monthly updates, ensuring timely incorporation of newly released neuroradiology datasets.  
+• **Comprehensive Neuroradiology Dataset Database:** A centrally curated foundational database containing dataset information from seven neuroradiology categories. These entries were initially extracted using a multi-reviewer approach to ensure accuracy, completeness, and consistency. This foundational database is then continuously expanded and maintained through monthly updates, ensuring timely incorporation of newly released neuroradiology datasets.  
 
 • **Conversational Dataset Exploration with the NeuroAI Chat Agent:** Users can interact with the NeuroAI Chat Agent to obtain category-level summaries, retrieve datasets based on natural-language criteria, generate visualizations, and run custom analytical procedures through conversational queries. 
 
 • **Interactive Web Application:** The web application supports both rapid, structured interactions—such as browsing datasets, applying filters, or generating basic plots—and more advanced exploratory tasks through the integrated NeuroAI Chat interface.  
 
-• **Dataset Updating AI Agent:** The NeuroAI Updating Agent autonomously searches the web for newly published neuroradiology datasets and extracts their metadata. This agent is employed in a scheduled monthly workflow to maintain an up-to-date dataset repository.  
-
-• **Open-Source Python Package:** All NeuroAIHub components are available as an open-source Python package, enabling programmatic access, local execution, and full transparency.  
+• **Open-Source Python Package:** The NeuroAI Chat Agent and the dataset database are available as an open-source Python package — the same agent that powers the website — enabling programmatic access, local execution, and full transparency.  
 
 • **Multi-Model Support:** NeuroAIHub supports any OpenAI-compatible model provider. Users can specify their API key, base URL, and model name, enabling flexible integration with a variety of LLM services.  
 
@@ -52,7 +50,7 @@ NeuroAIHub web application offers two complementary modes for exploring the data
 
 🔧 **Direct-Control Interface**
 
-A structured, form-based interface for quick tasks such as browsing datasets, applying filters, inspecting metadata tables, and generating basic plots. Ideal for users who prefer guided, non-conversational interaction.
+Browse by category, search and filter datasets (disease, modality, access, segmentation masks, healthy controls, publication year), open the full metadata of each dataset, download the results as CSV, and generate quick charts. Ideal for users who prefer guided, non-conversational interaction.
 
 💬 **NeuroAI Chat Agent Interface**
 
@@ -68,10 +66,8 @@ A conversational mode where users can ask natural-language questions directly to
 pip install neuroaihub
 ```
 
-The package includes:
-
-* **NeuroAI Chat Agent**
-* **NeuroAI Updating Agent**
+The package includes the **NeuroAI Chat Agent** (the same agent as on the website) and the dataset database.
+It works with any OpenAI-compatible provider whose model supports tool calling — for example OpenAI, or OpenRouter (including free models).
 
 
 🤖 **Example: Chat with the NeuroAI Chat Agent**
@@ -81,36 +77,24 @@ from neuroaihub import NeuroAIChatAgent
 
 agent = NeuroAIChatAgent(
     api_key="YOUR_API_KEY",
-    base_url="e.g https://api.openai.com/v1",
-    model="e.g gpt-5"
+    base_url="https://openrouter.ai/api/v1",            # leave out for OpenAI
+    model="nvidia/nemotron-3-super-120b-a12b:free"      # e.g. "gpt-5" with OpenAI
 )
 
 result = agent.chat("I’m planning a deep learning project on brain tumor segmentation. Which datasets would you recommend for this task?")
-agent.display(result)
+agent.display(result)          # answer, result table and charts (rich output in Jupyter)
+
+result = agent.chat("Which of those are open access?")   # follow-up questions use the previous results
+result["data"]                 # the matching datasets as a pandas DataFrame
 ```
 
-
-🔄 **Example: Run the NeuroAI Updating Agent**
+To work with the database directly:
 
 ```python
-from neuroaihub import NeuroAIUpdater
-
-NeuroAIUpdater(
-    llm_api_key="YOUR_API_KEY",
-    llm_base_url="https://api.openai.com/v1",
-    llm_model="e.g gpt-5",
-    serper_api="YOUR_SERPER_KEY",
-    tavily_api="YOUR_TAVILY_KEY",
-    verbose=True
-).run()
+from neuroaihub import load_database
+dataframes, combined_df, categories = load_database()
 ```
 
-The Updating Agent will:
-
-✔️ Search the web for new datasets  
-✔️ Extract structured metadata  
-✔️ Remove duplicates  
-✔️ Save new datasets automatically  
 
 ---
 
@@ -119,17 +103,20 @@ The Updating Agent will:
 NeuroAIHub is designed to grow with the community, and we warmly welcome contributions of all kinds.
 Users can help expand and improve the database and platform in several ways:
 
+**• Submit a Dataset via the Online Form (easiest)**
+
+Know a neuroradiology dataset that is not yet included? Fill in the short **[dataset submission form](SUBMIT_FORM_LINK)** — only six questions are required, and the team completes the remaining metadata.
+
 **• Submit New Datasets via Pull Request**
 
-If you discover a neuroradiology dataset that is not yet included, you can contribute by submitting a Pull Request.  
-Users may Use NeuroAIHub’s Updating Agent or any external agentic framework, or Manually search for datasets and extract their metadata.  
-Once you obtain the metadata, simply upload a new Excel or CSV file following the standard dataset format (template provided in the repository), and submit it as part of a PR.  
+You can also contribute by submitting a Pull Request.  
+Find the dataset's metadata (manually or with any AI tool), add it as a new row to the CSV file of the matching category in the database folder, following the same 22 columns, and submit it as part of a PR.  
 The development team will review the submission, and if validated, add it to the foundational database.  
 All contributors whose datasets are accepted will be acknowledged in the GitHub repository.
 
 **• Other Ways to Contribute**
 
-We also welcome contributions such as reporting missing or incorrect metadata, improving code quality, strengthening the agents, enhancing the web application, or providing feedback and suggestions through GitHub Issues.
+We also welcome contributions such as reporting missing or incorrect metadata, improving code quality, strengthening the chat agent, enhancing the web application, or providing feedback and suggestions through GitHub Issues.
 Any contribution helps advance NeuroAIHub and supports the neuroradiology research community.
 
 ---

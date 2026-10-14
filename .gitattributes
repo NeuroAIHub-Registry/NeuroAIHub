@@ -1,0 +1,2 @@
+# Keep the database CSVs byte-identical across operating systems
+*.csv text eol=lf
