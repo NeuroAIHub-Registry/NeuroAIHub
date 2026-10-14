@@ -11,12 +11,15 @@ on:
     - cron: "17 */4 * * *"   # every 4 hours
   workflow_dispatch:          # "Run workflow" button for a manual check
 
+# Note: GitHub pauses scheduled workflows after 60 days without commits to the repository and emails the owner first;
+# any commit (e.g. a database update) resets that, or re-enable the workflow with one click in the Actions tab.
+
 permissions:
-  actions: write              # lets the last step keep this schedule enabled (see below)
+  contents: read
 
 jobs:
   wake:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04      # pinned: the browser install below supports this Ubuntu version
     timeout-minutes: 20
     env:
       APP_URLS: "https://neuroai.streamlit.app"   # space-separated if there are several apps
@@ -71,9 +74,3 @@ jobs:
                   page.close()
               browser.close()
           sys.exit(1 if failed else 0)
-
-      # GitHub disables scheduled workflows in repositories without commits for 60 days. This step re-enables the
-      # workflow through the GitHub API (no commits are made).
-      - name: Keep this schedule enabled
-        if: always()
-        uses: gautamkrishnar/keepalive-workflow@v2
