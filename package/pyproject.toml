@@ -4,33 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neuroaihub"
-version = "1.0.2"
-description = "NeuroAIHub: An AI-Driven Framework for Automated Curation and Discovery of Neuroradiology Datasets"
+version = "2.0.0"
+description = "NeuroAIHub: AI-driven discovery of neuroradiology datasets — chat agent and curated dataset database"
 readme = "README.md"
 requires-python = ">=3.9"
-
+license = { text = "CC BY-NC-ND 4.0" }
 dependencies = [
-    "openai>=1.0.0",
-    "pandas>=1.5.3",
-    "requests>=2.32.3",
-    "beautifulsoup4>=4.12.3",
-    "PyPDF2>=3.0.1",
-    "python-dotenv>=1.0.0",
-    "tavily>=1.1.0",
-    "matplotlib>=3.10.6",
-    "seaborn>=0.12.2",
-    "openpyxl>=3.1.2",
-    "langchain==0.3.0",
-    "langchain-openai==0.3.17",
-    "langchain-experimental==0.3.4",
-    "pydantic>=2.11.4"
+    "openai>=1.40,<2",
+    "pandas>=1.5.3,<3",
+    "numpy>=1.24,<3",
+    "matplotlib>=3.8,<4",
 ]
+
+[project.optional-dependencies]
+notebook = ["ipython"]
 
 [tool.setuptools.packages.find]
 include = ["neuroaihub*"]
 
 [tool.setuptools.package-data]
-neuroaihub = ["NeuroAIHub_Database.xlsx"]
+neuroaihub = ["data/*.csv"]
 
 [project.urls]
-Homepage = "https://github.com/benyamin-gheiji/neuroaihub"
+Homepage = "https://github.com/NeuroAIHub-Registry/NeuroAIHub"
+Paper = "https://www.ajnr.org/content/early/2026/04/24/ajnr.A9363"

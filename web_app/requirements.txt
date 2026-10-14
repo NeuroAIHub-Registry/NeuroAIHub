@@ -1,10 +1,7 @@
-streamlit>=1.38.0
-pandas>=1.5.3
-matplotlib>=3.10.6
-seaborn>=0.12.2
-openpyxl>=3.1.2
-langchain==0.3.0
-langchain-openai==0.3.17
-langchain-experimental==0.3.4
-pydantic>=2.11.4
-
+# Version ranges keep a wake-up/redeploy on Streamlit Cloud from pulling in a breaking major release.
+streamlit>=1.38,<2
+pandas>=1.5.3,<3
+numpy>=1.24,<3
+matplotlib>=3.8,<4
+openai>=1.40,<2
+requests>=2.28,<3

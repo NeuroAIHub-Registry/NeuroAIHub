@@ -1,14 +1,79 @@
 name: Keep Streamlit App Alive
 
+# Streamlit Community Cloud puts apps to sleep after a period without real visitors. A plain `curl` does not count as a
+# visit (it never opens the app's live connection), so this job opens the app in a real headless browser, clicks
+# "Yes, get this app back up!" if the app is asleep, and waits until the app is running.
+# If the app does not come up within ~10 minutes (e.g. its packages fail to install on wake-up), the job fails and
+# GitHub emails the repository owner, who can then check the app's logs on share.streamlit.io.
+
 on:
   schedule:
-    - cron: "0 */3 * * *"
-  workflow_dispatch:
+    - cron: "17 */4 * * *"   # every 4 hours
+  workflow_dispatch:          # "Run workflow" button for a manual check
+
+permissions:
+  actions: write              # lets the last step keep this schedule enabled (see below)
 
 jobs:
-  ping:
+  wake:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APP_URLS: "https://neuroai.streamlit.app"   # space-separated if there are several apps
     steps:
-      - name: Ping Streamlit app
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install a headless browser
         run: |
-          curl -s https://neuroai.streamlit.app/ > /dev/null
+          pip install playwright==1.47.0
+          python -m playwright install --with-deps chromium
+
+      - name: Open the app and wake it if it is asleep
+        shell: python
+        run: |
+          import os, re, sys
+          from playwright.sync_api import sync_playwright
+
+          failed = False
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              for url in os.environ["APP_URLS"].split():
+                  page = browser.new_page()
+                  page.goto(url, wait_until="domcontentloaded", timeout=90_000)
+                  page.wait_for_timeout(8_000)
+                  wake = page.get_by_role("button", name=re.compile("get this app back up", re.I))
+                  if wake.count():
+                      print(f"{url}: asleep, waking it up")
+                      wake.first.click()
+                  # The app runs inside a frame of the page; wait (up to ~10 min, reloading every minute)
+                  # until Streamlit has rendered it.
+                  up = False
+                  for i in range(120):
+                      for frame in page.frames:
+                          try:
+                              if frame.locator('[data-testid="stAppViewContainer"]').count():
+                                  up = True
+                                  break
+                          except Exception:
+                              pass
+                      if up:
+                          break
+                      if i and i % 12 == 0:
+                          page.reload(wait_until="domcontentloaded", timeout=90_000)
+                          if wake.count():
+                              wake.first.click()
+                      page.wait_for_timeout(5_000)
+                  print(f"{url}: {'running' if up else 'DID NOT START'}")
+                  failed = failed or not up
+                  page.wait_for_timeout(15_000)   # keep the session open briefly, like a real visit
+                  page.close()
+              browser.close()
+          sys.exit(1 if failed else 0)
+
+      # GitHub disables scheduled workflows in repositories without commits for 60 days. This step re-enables the
+      # workflow through the GitHub API (no commits are made).
+      - name: Keep this schedule enabled
+        if: always()
+        uses: gautamkrishnar/keepalive-workflow@v2

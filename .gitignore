@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Local settings and secrets (set secrets in Streamlit Cloud > Settings > Secrets)
+.streamlit/secrets.toml
+.claude/
+
+# Dataset form submissions under review (contain contributor emails)
+web_app/dataset_submissions/pending/
