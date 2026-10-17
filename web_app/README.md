@@ -1,4 +1,4 @@
-# NeuroAIHub web app
+# NeuroAIHub website
 
 A Streamlit app that serves the website (`site/index.html`) driven by the full
 database, plus the existing NeuroAI chat agent underneath it.
@@ -23,9 +23,10 @@ Run it from inside `web_app` so `.streamlit/config.toml` (theme) is picked up.
 | `main.py` | Renders the website, then the chat section (model connection + agent) and the footer. |
 | `../package/neuroaihub/` | The chat agent (`agent.py`, `agent_tools.py`) and data parsing (`data.py`) live in the Python package; the app imports them from there, so the website and `pip install neuroaihub` run the same code. |
 | `ui_utils.py` | Paginated result tables. |
-| `dataset_submissions/` | "Submit a dataset" Google Form: script that creates it, setup notes, and a helper that turns responses into database rows (`SETUP.md`). |
-| `usage_log.py`, `usage_logging/` | Anonymous usage logging to a private Google Sheet (setup: `usage_logging/SETUP.md`). |
-| `tests/agent_benchmark.py`, `tests/BENCHMARK.md` | Checks the agent on 15 questions with known answers (needs an API key); questions and results. |
+| `usage_log.py` | Optional anonymous usage logging to a private Google Sheet (enabled by the `LOG_ENDPOINT` / `LOG_TOKEN` secrets). |
+
+Maintainer-only tools are kept locally and are not in the repository (git-ignored): `dataset_submissions/` (the dataset
+submission Google Form), `usage_logging/` (log sheet setup) and `tests/` (chat agent benchmark).
 
 The website is rendered in an iframe that sizes itself to its content, so the page scrolls as one document; the "Chat"
 links scroll the surrounding Streamlit page to the chat section.
@@ -56,14 +57,14 @@ Open a category CSV in any spreadsheet program or text editor and save it as CSV
   `lab_data`): start with `Yes`, `No` or `Not specified`;
 - `format`: image formats only (NIFTI, DICOM, MetaImage, NRRD, Analyze, MINC, HDF5, PNG, JPG, TIFF, ...);
 - `disease`: `Healthy` for healthy-volunteer datasets; `year` and `subject_no` start with a plain number.
-Change `DATABASE_UPDATED` in `data_utils.py` when you update the data. Before publishing a new package version, run
-`python package/sync_data.py` to copy the CSVs into the package.
+Change `DATABASE_UPDATED` in `data_utils.py` when you update the data. The Python package reads these CSVs from GitHub, so pushing a database update updates the package too (no new
+release needed). `python package/sync_data.py` refreshes the offline copy bundled with the package before a release.
 
 ## Deploying
 
 On Streamlit Community Cloud the app's main file is `web_app/main.py`. Community Cloud reads `.streamlit/config.toml`
 from the repository root, so the theme file exists in both places (the page styling does not depend on it; it only sets
 the theme of native Streamlit widgets).
-Optional usage logging: follow `usage_logging/SETUP.md`, then add `LOG_ENDPOINT` and `LOG_TOKEN` under the app's
+Optional usage logging: set up the log sheet (local `usage_logging/SETUP.md`), then add `LOG_ENDPOINT` and `LOG_TOKEN` under the app's
 Settings → Secrets. The keep-alive job is `.github/workflows/keep_alive.yml` in the repository root; add the new app's
 URL to `APP_URLS` there if the app address changes.

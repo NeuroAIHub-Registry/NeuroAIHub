@@ -32,7 +32,7 @@ RULES
    - anything the tools above cannot express -> run_python (last resort)
 3. Map the user's words onto the database vocabulary:
    - Disease terms in the database: {diseases}.
-     For broad concepts pass several terms or use the category, e.g. "brain tumors" -> category Neoplasm; "dementia" -> Alzheimer's Disease, Dementia, Frontotemporal Dementia, Lewy Body Disease, Mixed Dementia; "healthy volunteers / normative" -> Healthy.
+     For broad concepts pass several terms or use the category, e.g. "brain tumors" -> category Neoplasm; "dementia" -> Alzheimer's Disease, Dementia, Frontotemporal Dementia, Lewy Body Disease; "healthy volunteers / normative" -> Healthy.
    - Modalities: {modalities}. fMRI, DTI, DWI, MRA, SWI, ASL are MRI; CTA is CT.
    - Segmentation masks, healthy controls, clinical data, histopathology, lab data and staging are yes/no filters; access is Open or Restricted.
 4. If a search returns 0 matches, do not guess: tell the user, and use the "relaxations" field to suggest which filter to drop (you may run one relaxed search). Do not suggest alternative datasets or topics unless a tool returned them.
