@@ -21,7 +21,7 @@ REPO = "https://github.com/NeuroAIHub-Registry/NeuroAIHub"
 SUBMIT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfCCAqT9-tx4he0kocomjPqSv4TsO96qrbroEiisgmyQOod_g/viewform"
 PAPER = "https://www.ajnr.org/content/early/2026/04/24/ajnr.A9363"
 
-st.set_page_config(page_title="NeuroAIHub — Neuroradiology Dataset Discovery", page_icon="🧠",
+st.set_page_config(page_title="NeuroAIHub — Neuroradiology Dataset Discovery", page_icon=(SITE_DIR / "logo.svg").read_text(encoding="utf-8"),
                    layout="wide", initial_sidebar_state="collapsed")
 
 # ---------------------------------------------------------------- page styling (matches site/index.html)
@@ -77,7 +77,7 @@ dataframes, combined_df, sheet_names = load_data()
 
 
 @st.cache_data(show_spinner=False)
-def build_site(_df: pd.DataFrame, categories: tuple, template_mtime: float, log_url: str, form_url: str) -> str:
+def build_site(_df: pd.DataFrame, categories: tuple, template_mtime: float, logo_mtime: float, log_url: str, form_url: str) -> str:
     payload = {"rows": site_records(_df), "categories": list(categories), "columns": COLUMNS, "updated": DATABASE_UPDATED}
     data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     logo = "data:image/svg+xml;base64," + base64.b64encode((SITE_DIR / "logo.svg").read_bytes()).decode()
@@ -87,7 +87,8 @@ def build_site(_df: pd.DataFrame, categories: tuple, template_mtime: float, log_
 
 
 # Initial height only; the page resizes its own frame to fit the content.
-site_html = build_site(combined_df, tuple(sheet_names), (SITE_DIR / "index.html").stat().st_mtime, usage_log.endpoint(),
+site_html = build_site(combined_df, tuple(sheet_names), (SITE_DIR / "index.html").stat().st_mtime,
+                       (SITE_DIR / "logo.svg").stat().st_mtime, usage_log.endpoint(),
                        SUBMIT_FORM_URL)
 components.html(site_html, height=4200, scrolling=False)
 
@@ -102,18 +103,31 @@ st.markdown("""
 
 for key in ("api_key", "base_url", "model"):
     st.session_state.setdefault(key, "")
+# Keep the values when their widgets are not drawn in a run (explicit assignment works on all Streamlit versions).
+for key in ("api_key", "base_url", "model"):
+    st.session_state[key] = st.session_state[key]
+st.session_state.setdefault("show_connection", False)
 
-ready = bool(st.session_state.api_key.strip() and st.session_state.model.strip())
-with st.expander("🔑 Model connection" + (f" — {st.session_state.model.strip()}" if ready else ""), expanded=not ready):
-    c1, c2, c3 = st.columns(3)
-    c1.text_input("API key", type="password", placeholder="sk-...", key="api_key")
-    c2.text_input("Base URL (optional)", placeholder="https://api.openai.com/v1", key="base_url",
-                  help="Leave empty for OpenAI. Any OpenAI-compatible endpoint works, e.g. https://openrouter.ai/api/v1")
-    c3.text_input("Model name", placeholder="e.g. gpt-5", key="model",
-                  help="The model must support tool (function) calling.")
-    st.caption("Your key is used only for this session and is not stored. Free option: an OpenRouter key with base URL "
-               "`https://openrouter.ai/api/v1` and a free model such as `nvidia/nemotron-3-super-120b-a12b:free` "
-               "(free models are rate-limited and can be slow).")
+user_api_key = st.session_state.api_key.strip()
+user_model = st.session_state.model.strip()
+connected = bool(user_api_key and user_model)
+
+if not (connected or st.session_state.show_connection):
+    # Clean first view: one button instead of empty input boxes.
+    if st.button("🔑 Connect your API key and model to start chatting", type="primary"):
+        st.session_state.show_connection = True
+        st.rerun()
+else:
+    with st.expander("🔑 Model connection" + (f" — {user_model}" if connected else ""), expanded=not connected):
+        c1, c2, c3 = st.columns(3)
+        c1.text_input("API key", type="password", placeholder="sk-...", key="api_key")
+        c2.text_input("Base URL (optional)", placeholder="https://api.openai.com/v1", key="base_url",
+                      help="Leave empty for OpenAI. Any OpenAI-compatible endpoint works, e.g. https://openrouter.ai/api/v1")
+        c3.text_input("Model name", placeholder="e.g. gpt-5", key="model",
+                      help="The model must support tool (function) calling.")
+        st.caption("Your key is used only for this session and is not stored. Free option: an OpenRouter key with base URL "
+                   "`https://openrouter.ai/api/v1` and a free model such as `nvidia/nemotron-3-super-120b-a12b:free` "
+                   "(free models are rate-limited and can be slow).")
 
 # Per-session tool state (it remembers the last search for follow-up questions).
 if "agent_tools" not in st.session_state:
@@ -139,16 +153,12 @@ def render_message(i, msg):
                     st.code(f"{name}({json.dumps(args, ensure_ascii=False)})", language="python")
 
 
-for i, msg in enumerate(st.session_state.messages):
-    render_message(i, msg)
-if st.session_state.get("chat_error"):
-    st.error(st.session_state.pop("chat_error"))
+if connected:
+    for i, msg in enumerate(st.session_state.messages):
+        render_message(i, msg)
+    if st.session_state.get("chat_error"):
+        st.error(st.session_state.pop("chat_error"))
 
-user_api_key = st.session_state.api_key.strip()
-user_model = st.session_state.model.strip()
-if not (user_api_key and user_model):
-    st.info("🧠 Enter your API key and model name above to enable the chat agent.")
-else:
     # Inside a container the chat box stays under the conversation instead of floating over the page.
     with st.container():
         user_query = st.chat_input("Let's talk about neuroradiology datasets!")
@@ -169,9 +179,9 @@ else:
                                               "images": result.images, "steps": result.steps})
         st.rerun()
 
-if usage_log.endpoint():
-    st.caption("Questions and filter choices are logged anonymously (no API keys, IP addresses or personal data) to "
-               "improve NeuroAIHub. Please don't include personal information in your questions.")
+    if usage_log.endpoint():
+        st.caption("Questions and filter choices are logged anonymously (no API keys, IP addresses or personal data) to "
+                   "improve NeuroAIHub. Please don't include personal information in your questions.")
 
 # ---------------------------------------------------------------- footer
 st.markdown(f"""
@@ -185,7 +195,7 @@ st.markdown(f"""
     <div>
       <h5>Project</h5>
       <a href="{REPO}" target="_blank" rel="noopener">GitHub repository</a>
-      <a href="{REPO}#-getting-started" target="_blank" rel="noopener">Installation guide</a>
+      <a href="{REPO}#-offline-installation" target="_blank" rel="noopener">Offline installation guide</a>
       <a href="{PAPER}" target="_blank" rel="noopener">Research paper (AJNR)</a>
     </div>
     <div>

@@ -9,5 +9,7 @@ dist/
 .streamlit/secrets.toml
 .claude/
 
-# Dataset form submissions under review (contain contributor emails)
-web_app/dataset_submissions/pending/
+# Maintainer-only tools, kept locally (form, usage logging setup, agent tests)
+web_app/dataset_submissions/
+web_app/usage_logging/
+web_app/tests/

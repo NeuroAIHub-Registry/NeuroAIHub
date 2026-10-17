@@ -4,6 +4,7 @@ import io
 
 from .agent import NeuroAIAgent
 from .agent_tools import DatasetTools
+from . import data
 from .data import load_database
 
 
@@ -29,7 +30,7 @@ class NeuroAIChatAgent:
     OpenAI. The conversation is remembered, so follow-up questions ("which of those are open access?") work.
     """
 
-    def __init__(self, api_key, base_url=None, model=None, verbose=False, data_dir=None):
+    def __init__(self, api_key, base_url=None, model=None, verbose=False, data_dir=None, refresh_data=False):
         if not api_key or not model:
             raise ValueError("api_key and model are required, e.g. model='gpt-5' or "
                              "model='nvidia/nemotron-3-super-120b-a12b:free' with base_url='https://openrouter.ai/api/v1'")
@@ -37,7 +38,11 @@ class NeuroAIChatAgent:
         self.base_url = (str(base_url).strip() or None) if base_url else None
         self.model = str(model).strip()
         self.verbose = verbose
-        self.dataframes, self.combined_df, self.categories = load_database(data_dir)
+        # Latest database from GitHub (cached for a day); data_dir reads a local folder instead.
+        self.dataframes, self.combined_df, self.categories = load_database(data_dir, refresh=refresh_data)
+        self.data_source = data.last_source
+        if verbose:
+            print(f"[data] {len(self.combined_df)} datasets from {self.data_source}")
         self.reset()
 
     def reset(self):

@@ -17,7 +17,10 @@ LOOKUPS_LIMIT = 2000
 
 
 def _secret(name):
+    # Check for a secrets file first: reading st.secrets without one shows a red "No secrets found" message.
     try:
+        if hasattr(st.secrets, "load_if_toml_exists") and not st.secrets.load_if_toml_exists():
+            return ""
         return str(st.secrets.get(name, "") or "").strip()
     except Exception:  # no secrets file (e.g. local development)
         return ""

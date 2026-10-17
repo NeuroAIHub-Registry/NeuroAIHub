@@ -38,12 +38,20 @@ link in an answer is computed from the database by the agent's tools — the mod
 `steps` (database lookups made), `status`, `error`, `model_calls`. Use `agent.reset()` to start a new conversation and
 `verbose=True` to print the lookups.
 
+## Always the latest database
+
+The package reads the database straight from the [NeuroAIHub GitHub repository](https://github.com/NeuroAIHub-Registry/NeuroAIHub/tree/main/web_app/assets/datasets),
+so new and corrected datasets are available as soon as they are published there — no package update needed.
+The download is cached for 24 hours (in `~/.cache/neuroaihub`); without internet the cached copy, or the copy bundled
+with the package, is used. `NeuroAIChatAgent(..., refresh_data=True)` or `load_database(refresh=True)` forces a fresh
+download; `agent.data_source` shows where the data came from.
+
 ## Use the database directly
 
 ```python
 from neuroaihub import load_database
 
-dataframes, combined_df, categories = load_database()   # one DataFrame per category + all combined
+dataframes, combined_df, categories = load_database()   # latest from GitHub: one DataFrame per category + all combined
 ```
 
 Each dataset has 22 metadata fields: name, DOI, URL, year, access type, institution, country, modality, resolution,
@@ -55,7 +63,7 @@ disease, healthy controls, staging, clinical data, histopathology and lab data.
 - New chat agent (identical to the website): tool calling instead of LangChain, about 2 model calls per question,
   charts (bar, pie, line, multi-series, scatter, histogram, box), follow-up questions, and robust handling of free
   and smaller models.
-- Updated and cleaned database (368 datasets, seven categories), stored as CSV.
+- Updated and cleaned database (368 datasets, seven categories), read live from GitHub.
 - The dataset updating agent (`NeuroAIUpdater`) has been removed.
 
 License: CC BY-NC-ND 4.0.
