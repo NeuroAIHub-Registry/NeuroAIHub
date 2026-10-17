@@ -2671,10 +2671,11 @@
     (function buildFilterMock() {
       const q = ROWS.filter(d => d.c === 'Neoplasm' && d.mods.includes('MRI') && d.mask === 'yes' && d.acc === 'Open')
         .sort((a, b) => (b.yr || 0) - (a.yr || 0));
+      const featured = q.filter(d => /^BraTS 2025 /i.test(d.f.dataset_name));   // shown first in the example
       $('filterMock').innerHTML = `
         <div class="demo-chips"><span class="demo-chip">Neoplasm</span><span class="demo-chip">MRI</span><span class="demo-chip">Segmentation mask</span><span class="demo-chip">Open access</span></div>
         <div class="demo-count"><b>${q.length}</b> datasets match your filters</div>
-        ${miniCards(q.slice(0, 2))}`;
+        ${miniCards(featured.concat(q.filter(d => !featured.includes(d) && !/^Matched MRI, Segmentations/i.test(d.f.dataset_name))).slice(0, 2))}`;
     })();
     (function buildChatMock() {
       const q = ROWS.filter(d => d.dis.includes("Alzheimer's Disease") && d.mods.includes('MRI') && d.mods.includes('PET'))
