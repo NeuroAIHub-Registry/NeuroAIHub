@@ -132,7 +132,7 @@ All contributors whose datasets are accepted are acknowledged in this repository
 <table>
   <tr>
     <td width="170" valign="top">
-      <img src="docs/images/benyamin_gheiji.jpg" alt="Benyamin Gheiji" width="150" />
+      <img src="docs/images/benyamin_gheiji.png" alt="Benyamin Gheiji" width="150" />
     </td>
     <td valign="top">
       <h3>Benyamin Gheiji</h3>
