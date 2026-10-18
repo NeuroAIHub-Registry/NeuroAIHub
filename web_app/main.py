@@ -9,7 +9,8 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from data_utils import load_data, site_records, COLUMNS, DATABASE_UPDATED  # also puts ../package on the path
+from data_utils import load_data, site_records, COLUMNS, DATABASE_UPDATED, refresh_package  # also puts ../package on the path
+refresh_package()  # pick up updated agent/data code after a push (Streamlit only reloads files inside web_app/)
 from ui_utils import display_paginated_dataframe
 from neuroaihub.agent import NeuroAIAgent
 from neuroaihub.agent_tools import DatasetTools
@@ -140,8 +141,10 @@ else:
                       help="Leave empty for OpenAI. Any OpenAI-compatible endpoint works, e.g. https://openrouter.ai/api/v1")
         c3.text_input("Model name", placeholder="e.g. gpt-5", key="model",
                       help="The model must support tool (function) calling.")
-        st.caption("Your key is used only for this session and is not stored. Free option: an OpenRouter key with base URL "
-                   "`https://openrouter.ai/api/v1` and a free model such as `nvidia/nemotron-3-super-120b-a12b:free` "
+        st.caption("Your key is used only for this session and is not stored. Free option: get a key at "
+                   "[OpenRouter](https://openrouter.ai/keys), use the base URL `https://openrouter.ai/api/v1` and a free "
+                   "model such as [nvidia/nemotron-3-super-120b-a12b:free]"
+                   "(https://openrouter.ai/nvidia/nemotron-3-super-120b-a12b:free) "
                    "(free models are rate-limited and can be slow).")
 
 # Per-session tool state (it remembers the last search for follow-up questions).

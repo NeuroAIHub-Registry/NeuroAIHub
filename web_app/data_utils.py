@@ -1,3 +1,4 @@
+import importlib
 import sys
 from pathlib import Path
 
@@ -21,10 +22,34 @@ DB_DIR = Path(__file__).resolve().parent / "assets" / "datasets"
 DATABASE_UPDATED = "October 2026"
 
 
+def _stamp(paths):
+    return tuple(sorted((p.name, p.stat().st_mtime_ns, p.stat().st_size) for p in paths))
+
+
+def refresh_package():
+    """Reload the neuroaihub package when its files changed (e.g. after a push to GitHub).
+
+    Streamlit only reloads modules inside web_app/, so without this the live app would keep running the old agent and
+    data code from ../package until it is rebooted. Call it before importing from neuroaihub in main.py.
+    """
+    import neuroaihub
+    if getattr(neuroaihub, "_SOURCE_STAMP", None) == _stamp((_PACKAGE_DIR / "neuroaihub").glob("*.py")):
+        return
+    for name in ("neuroaihub.data", "neuroaihub.agent_tools", "neuroaihub.agent", "neuroaihub.chat", "neuroaihub"):
+        if name in sys.modules:
+            importlib.reload(sys.modules[name])
+
+
 @st.cache_resource
+def _load(stamp):
+    import neuroaihub.data
+    return neuroaihub.data.load_database(DB_DIR)
+
+
 def load_data():
+    """The database, cached until the CSV files or the package's data code change."""
     try:
-        return load_database(DB_DIR)
+        return _load(_stamp(list(DB_DIR.glob("*.csv")) + [_PACKAGE_DIR / "neuroaihub" / "data.py"]))
     except FileNotFoundError as e:
         st.error(f"❌ {e}", icon="⚠️")
         st.stop()
