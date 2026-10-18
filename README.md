@@ -93,7 +93,7 @@ Want a quick overview of how NeuroAIHub works?
 
 # 🎯 **Key Features**
 
-• **Comprehensive Neuroradiology Dataset Database:** A centrally curated database of public neuroradiology datasets in seven categories — Neurodegenerative, Neoplasm, Cerebrovascular, Psychiatric, Spinal, Neurodevelopmental and Other. The foundational entries were extracted with a multi-reviewer approach to ensure accuracy, completeness and consistency, and the database is continuously expanded and corrected through monthly updates.
+• **Comprehensive Neuroradiology Dataset Database:** A centrally curated database of public neuroradiology datasets in seven categories — Neurodegenerative/Inflammatory Diseases, Neoplasm, Cerebrovascular Diseases, Psychiatric Diseases, Spine, Neurodevelopmental Diseases and Other. The foundational entries were extracted with a multi-reviewer approach to ensure accuracy, completeness and consistency, and the database is continuously expanded and corrected through monthly updates.
 
 • **Conversational Dataset Exploration with the NeuroAI Chat Agent:** Ask for category summaries, find datasets with natural-language criteria, get recommendations for a research project, compare datasets and create charts. Every dataset name, number and link in an answer is computed from the database — the agent does not answer from memory.
 
@@ -157,7 +157,7 @@ Special appreciation to my colleagues [**Sina Moradi**](https://www.linkedin.com
 
 Additional thanks to [**Dr. Mana Moassefi**](https://www.linkedin.com/in/mana-moassefi-a6b589119/), [**Dr. Jeffrey Rudie**](https://www.linkedin.com/in/jeff-rudie/), [**Dr. Evan Calabrese**](https://scholar.google.com/citations?user=gNEakpEAAAAJ&hl=en), and [**Dr. Rajan Jain**](https://scholar.google.com/citations?user=Wgi5-XMAAAAJ&hl=en) for their invaluable comments and thoughtful feedback, which helped refine and strengthen the project.
 
-Many thanks to [**Mohammad Hossein Kazemi**](https://thisiskazzi.github.io/), [**Sana Shokrani**](https://www.linkedin.com/in/sana-shokrani-6392512a4), and [**Danial Elyassirad**](https://www.linkedin.com/in/danial-elyassirad-6aa625245) for their help in continuously updating the database and making NeuroAIHub better.
+Many thanks to [**Mohammad Hossein Kazemi**](https://thisiskazzi.github.io/), [**Sana Shokrani**](https://www.linkedin.com/in/sana-shokrani-6392512a4), [**Danial Elyassirad**](https://www.linkedin.com/in/danial-elyassirad-6aa625245), and [**Mahsa Vatanparast**](https://www.linkedin.com/in/mahsa-vatanparast-24314b2a7) for their help in continuously updating the database and making NeuroAIHub better.
 
 A very special thanks to [**Dr. Shahriar Faghani**](https://www.linkedin.com/in/shahriar-faghani-7b468082) for his visionary idea that inspired this project, and for his invaluable mentorship, encouragement, and guidance. His influence was instrumental in transforming NeuroAIHub from a concept into a working ecosystem.
 

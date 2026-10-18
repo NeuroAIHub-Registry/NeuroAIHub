@@ -2225,6 +2225,23 @@
       font-family: var(--display);
       font-size: 1rem;
     }
+    /* Category names: break only between words (or after "/"), never inside a word */
+    .cat-tile .t {
+      overflow-wrap: normal !important;
+      word-break: normal;
+      hyphens: manual;
+    }
+
+    @media (max-width:480px) {
+      .cat-tile .t {
+        font-size: .82rem;
+      }
+    }
+
+    .ds-mod {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
   </style>
 </head>
 
@@ -2243,6 +2260,7 @@
         <a href="#find">Find Datasets</a>
         <a href="#viz">Visualize</a>
         <a href="#chat">Chat</a>
+        <a href="#about">About us</a>
         <a href="https://github.com/NeuroAIHub-Registry/NeuroAIHub" target="_blank" rel="noopener">GitHub</a>
       </nav>
       <div class="nav-actions">
@@ -2262,6 +2280,7 @@
       <a href="#find">Find Datasets</a>
       <a href="#viz">Visualize</a>
       <a href="#chat">Chat with NeuroAI</a>
+      <a href="#about">About us</a>
       <a href="https://github.com/NeuroAIHub-Registry/NeuroAIHub" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.ajnr.org/content/early/2026/04/24/ajnr.A9363" target="_blank" rel="noopener"
         class="btn btn-primary" style="margin-top:10px;justify-content:center;">Paper (AJNR)</a>
@@ -2276,8 +2295,8 @@
         <div class="reveal in">
           <span class="eyebrow"><span class="dot"></span> AI-Driven Dataset Discovery</span>
           <h1>Find the right <span class="accent">neuroradiology dataset</span> — in seconds.</h1>
-          <p class="lede">A curated, continuously updated database of <b id="heroCount">—</b> public neuroradiology
-            datasets. Browse and filter it here, or ask the NeuroAI chat agent.</p>
+          <p class="lede">A curated database of <b id="heroCount">—</b> public neuroradiology datasets, updated monthly
+            (last update: <span id="heroUpdated">—</span>). Browse and filter it here, or ask the NeuroAI chat agent.</p>
           <div class="hero-cta">
             <a href="#find" class="btn btn-primary">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -2565,11 +2584,11 @@
       return fmtInt(d.n);
     }
 
-    /* Scroll to a section; "#chat" lives in the Streamlit page around this iframe. */
+    /* Scroll to a section; "#chat" and "#about" live in the Streamlit page around this iframe. */
     function goTo(hash) {
       if (hash === '#top' || hash === '#') { scrollToEl(document.body); return; }
-      if (hash === '#chat') {
-        try { const el = window.parent.document.getElementById('chat'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; } } catch (e) { }
+      if (hash === '#chat' || hash === '#about') {
+        try { const el = window.parent.document.getElementById(hash.slice(1)); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; } } catch (e) { }
       }
       const el = document.querySelector(hash);
       if (el) scrollToEl(el);
@@ -2654,6 +2673,7 @@
     const openCount = ROWS.filter(d => d.acc === 'Open').length;
 
     $('heroCount').textContent = fmtInt(ROWS.length);
+    $('heroUpdated').textContent = DB.updated;
     $('heroMeta').innerHTML = [
       [fmtInt(ROWS.length), 'Datasets'],
       [CATS.length, 'Categories'],
@@ -2689,7 +2709,7 @@
       CATS.map(c => {
         const rows = ROWS.filter(d => d.c === c);
         const top = topBy(countBy(rows.flatMap(d => d.dis).filter(x => x !== 'Healthy')), 3).join(' · ');
-        return `<button type="button" class="cat-tile" data-cat="${esc(c)}"><span class="n">${catCounts.get(c) || 0}</span><span class="t">${esc(c)}</span><span class="s">${esc(top)}</span></button>`;
+        return `<button type="button" class="cat-tile" data-cat="${esc(c)}"><span class="n">${catCounts.get(c) || 0}</span><span class="t">${esc(c).replace("/", "/<wbr>")}</span><span class="s">${esc(top)}</span></button>`;
       }).join('');
     $('catGrid').addEventListener('click', e => {
       const t = e.target.closest('.cat-tile'); if (!t) return;
@@ -2780,12 +2800,24 @@
       boxes.forEach(b => b.addEventListener('change', () => sync(false)));
       if (search) search.addEventListener('input', () => {
         const q = search.value.trim().toLowerCase(); let any = false;
-        box.querySelectorAll('.ms-option').forEach(o => { const hit = o.dataset.v.includes(q); o.hidden = !hit; any = any || hit; });
+        box.querySelectorAll('.ms-option').forEach(o => { const hit = o.dataset.avail !== '0' && o.dataset.v.includes(q); o.hidden = !hit; any = any || hit; });
         box.querySelector('.ms-none').hidden = any;
       });
       multi[key] = {
         reset() { boxes.forEach(b => b.checked = false); sync(true); },
         set(vals) { boxes.forEach(b => b.checked = vals.includes(b.value)); sync(true); },
+        /* Show only options that occur in `counts` (with updated counts); hidden options are also unticked. */
+        restrict(counts) {
+          const q = search ? search.value.trim().toLowerCase() : '';
+          box.querySelectorAll('.ms-option').forEach(o => {
+            const b = o.querySelector('input'), n = counts.get(b.value) || 0;
+            o.dataset.avail = n ? '1' : '0';
+            o.querySelector('.cnt').textContent = n;
+            if (!n) b.checked = false;
+            o.hidden = !n || (q && !o.dataset.v.includes(q));
+          });
+          sync(true);
+        },
       };
       sync(true);
     }
@@ -2879,7 +2911,15 @@
       name: (a, b) => a.f.dataset_name.localeCompare(b.f.dataset_name),
       subj: (a, b) => (b.n || -1) - (a.n || -1),
     };
+    /* Disease and modality lists only offer values that exist in the selected categories. */
+    function restrictToCategories() {
+      const cats = selected.category;
+      const rows = cats.size ? ROWS.filter(d => cats.has(d.c)) : ROWS;
+      multi.disease.restrict(countBy(rows.flatMap(d => d.dis)));
+      multi.modality.restrict(countBy(rows.flatMap(d => d.mods)));
+    }
     function applyFilters(keepPage) {
+      restrictToCategories();
       lastRows = filtered().sort(SORTS[fSort.value]);
       if (!keepPage) shown = PAGE;
       fCount.textContent = fmtInt(lastRows.length);

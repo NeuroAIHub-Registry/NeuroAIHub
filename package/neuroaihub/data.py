@@ -27,7 +27,15 @@ GITHUB_DATA_PATH = "web_app/assets/datasets"
 CACHE_DIR = Path(os.environ.get("NEUROAIHUB_CACHE", Path.home() / ".cache" / "neuroaihub"))
 CACHE_HOURS = 24
 last_source = ""   # where the most recent load_database() call read its data from
+# CSV file names (stable, used in URLs) in display order, and the category names shown to users.
 CATEGORY_ORDER = ["Neurodegenerative", "Neoplasm", "Cerebrovascular", "Psychiatric", "Spinal", "Neurodevelopmental", "Other"]
+CATEGORY_LABELS = {
+    "Neurodegenerative": "Neurodegenerative/Inflammatory Diseases",
+    "Cerebrovascular": "Cerebrovascular Diseases",
+    "Psychiatric": "Psychiatric Diseases",
+    "Spinal": "Spine",
+    "Neurodevelopmental": "Neurodevelopmental Diseases",
+}
 
 COLUMNS = [
     "dataset_name", "doi", "url", "year", "access_type", "institution", "country", "modality", "resolution",
@@ -154,7 +162,8 @@ def load_database(csv_dir=None, source="auto", refresh=False):
     """Read every category CSV. Returns (dataframes by category, combined DataFrame, category names).
 
     By default the latest database is read from GitHub (see database_folder); pass csv_dir to read a local folder.
-    Categories follow CATEGORY_ORDER; other CSV files in the folder are added after them, alphabetically.
+    Categories follow CATEGORY_ORDER and are named by CATEGORY_LABELS (file name otherwise); other CSV files in the folder
+    are added after them, alphabetically.
     """
     global last_source
     if csv_dir:
@@ -165,10 +174,11 @@ def load_database(csv_dir=None, source="auto", refresh=False):
     files = {p.stem: p for p in folder.glob("*.csv")} if folder.exists() else {}
     if not files:
         raise FileNotFoundError(f"No database CSV files found in {folder}")
-    categories = [c for c in CATEGORY_ORDER if c in files] + sorted(c for c in files if c not in CATEGORY_ORDER)
+    stems = [c for c in CATEGORY_ORDER if c in files] + sorted(c for c in files if c not in CATEGORY_ORDER)
+    categories = [CATEGORY_LABELS.get(stem, stem) for stem in stems]
     dataframes = {}
-    for category in categories:
-        df = pd.read_csv(files[category], dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    for stem, category in zip(stems, categories):
+        df = pd.read_csv(files[stem], dtype=str, keep_default_na=False, encoding="utf-8-sig")
         df.columns = [str(c).strip() for c in df.columns]
         df = df.apply(lambda s: s.str.strip())
         df = df[(df != "").any(axis=1)]

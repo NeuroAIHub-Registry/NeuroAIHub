@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neuroaihub"
-version = "2.0.0"
+version = "1.1.0"
 description = "NeuroAIHub: AI-driven discovery of neuroradiology datasets — chat agent and curated dataset database"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -27,4 +27,5 @@ neuroaihub = ["data/*.csv"]
 
 [project.urls]
 Homepage = "https://github.com/NeuroAIHub-Registry/NeuroAIHub"
+Website = "https://neuroai.streamlit.app/"
 Paper = "https://www.ajnr.org/content/early/2026/04/24/ajnr.A9363"

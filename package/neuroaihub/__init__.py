@@ -2,5 +2,5 @@
 from neuroaihub.chat import NeuroAIChatAgent
 from neuroaihub.data import load_database
 
-__version__ = "2.0.0"
+__version__ = "1.1.0"
 __all__ = ["NeuroAIChatAgent", "load_database", "__version__"]
