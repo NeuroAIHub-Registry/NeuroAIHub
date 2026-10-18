@@ -47,6 +47,21 @@ iframe[title="st.iframe"]{ display:block; width:100vw !important; max-width:none
   color:var(--deep) !important; letter-spacing:-.02em; line-height:1.15 !important; padding:0 !important; margin:0 !important; }
 .nai-title .accent{ background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .nai-lede{ color:rgba(18,59,74,.72); font-size:1.05rem; margin-top:18px; }
+/* about us: compact, one row on desktop */
+.nai-team{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; margin-bottom:10px; }
+.nai-member{ background:#fff; border:1px solid var(--frost); border-radius:14px; padding:14px 10px 12px; text-align:center;
+  box-shadow:0 4px 14px -8px rgba(26,163,217,.18); display:flex; flex-direction:column; align-items:center; }
+.nai-member img{ width:68px; height:68px; border-radius:50%; object-fit:cover; border:2px solid var(--frost); margin-bottom:8px; }
+.nai-member .name{ font-family:'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:.88rem; line-height:1.25; color:var(--deep); }
+.nai-member .role{ font-size:.58rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ocean); margin:4px 0 5px; }
+.nai-member .blurb{ font-size:.72rem; color:rgba(18,59,74,.68); line-height:1.4; margin:0 0 8px; }
+.nai-member .links{ display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin-top:auto; }
+.nai-member .links a{ font-size:.64rem; font-weight:600; color:var(--ocean) !important; text-decoration:none !important;
+  border:1px solid var(--frost); background:var(--bg-soft); border-radius:999px; padding:2px 8px; }
+.nai-member .links a:hover{ border-color:var(--ocean); }
+.nai-member.lead{ border-color:var(--sparkle); }
+@media (max-width:1000px){ .nai-team{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:560px){ .nai-team{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } }
 [data-testid="stExpander"] details{ background:#fff; border:1px solid var(--frost); border-radius:14px; }
 [data-testid="stExpander"] summary p{ font-weight:600; color:var(--deep); }
 [data-testid="stChatMessage"]{ background:#fff; border:1px solid var(--frost); border-radius:16px; padding:14px 16px; }
@@ -182,6 +197,52 @@ if connected:
     if usage_log.endpoint():
         st.caption("Questions and filter choices are logged anonymously (no API keys, IP addresses or personal data) to "
                    "improve NeuroAIHub. Please don't include personal information in your questions.")
+
+# ---------------------------------------------------------------- about us
+TEAM = [
+    ("benyamin-gheiji", "Benyamin Gheiji", "Project Lead", "MD Candidate · ML Engineer · Medical Imaging AI Researcher",
+     [("Portfolio", "https://benyamin-gheiji.github.io/"),
+      ("LinkedIn", "https://www.linkedin.com/in/benyamin-gheiji-4a0668260"),
+      ("Scholar", "https://scholar.google.com/citations?user=0Fdy24gAAAAJ&hl=en"),
+      ("GitHub", "https://github.com/benyamin-gheiji"), ("Email", "mailto:benyamingheiji@gmail.com")]),
+    ("mohammad-hossein-kazemi", "Mohammad Hossein Kazemi", "Project Contributor",
+     "Computer Engineering-DBA Candidate | Creating Organically",
+     [("Portfolio", "https://thisiskazzi.github.io/"), ("GitHub", "https://github.com/thisiskazzi")]),
+    ("sana-shokrani", "Sana Shokrani", "Project Contributor",
+     "MD Candidate at Tehran University of Medical Sciences · Neurosurgery Researcher",
+     [("LinkedIn", "https://www.linkedin.com/in/sana-shokrani-6392512a4"), ("Email", "mailto:sanashokrani061@gmail.com")]),
+    ("danial-elyassirad", "Danial Elyassirad", "Project Contributor", "Medical Doctor · Medical Imaging AI Researcher",
+     [("Website", "https://danialelyassirad.github.io/"),
+      ("Scholar", "https://scholar.google.com/citations?user=RzDOvMwAAAAJ&hl=en"),
+      ("LinkedIn", "https://www.linkedin.com/in/danial-elyassirad")]),
+    ("mahsa-vatanparast", "Mahsa Vatanparast", "Project Contributor", "Medical Doctor · Medical Imaging AI Researcher",
+     [("Scholar", "https://scholar.google.com/citations?user=rEmIJDIAAAAJ&hl=en"),
+      ("LinkedIn", "https://www.linkedin.com/in/mahsa-vatanparast-24314b2a7")]),
+    ("shahriar-faghani", "Shahriar Faghani", "Supervisor & Mentor",
+     "Radiology Resident at the University of Pennsylvania · Adjunct Assistant Professor of Radiology at Mayo Clinic",
+     [("Scholar", "https://scholar.google.com/citations?user=6HV5eJAAAAAJ&hl=en"),
+      ("LinkedIn", "https://www.linkedin.com/in/shahriar-faghani-7b468082")]),
+]
+
+
+@st.cache_data(show_spinner=False)
+def team_html(photos_mtime: float) -> str:
+    cards = []
+    for slug, name, role, blurb, links in TEAM:
+        photo = base64.b64encode((SITE_DIR / "team" / f"{slug}.webp").read_bytes()).decode()
+        anchors = "".join(f'<a href="{url}" target="_blank" rel="noopener">{label}</a>' for label, url in links)
+        cards.append(f'<div class="nai-member{" lead" if role == "Project Lead" else ""}">'
+                     f'<img src="data:image/webp;base64,{photo}" alt="{name}" />'
+                     f'<div class="name">{name}</div><div class="role">{role}</div>'
+                     f'<p class="blurb">{blurb}</p><div class="links">{anchors}</div></div>')
+    return ("""<div class="nai-head" id="about">
+  <span class="nai-eyebrow"><i></i> About us</span>
+  <h2 class="nai-title">The <span class="accent">NeuroAIHub</span> team</h2>
+  <p class="nai-lede">The people who build NeuroAIHub and keep its database up to date.</p>
+</div>""" + f'<div class="nai-team">{"".join(cards)}</div>')
+
+
+st.markdown(team_html(max(p.stat().st_mtime for p in (SITE_DIR / "team").glob("*.webp"))), unsafe_allow_html=True)
 
 # ---------------------------------------------------------------- footer
 st.markdown(f"""
