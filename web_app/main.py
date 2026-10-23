@@ -143,8 +143,8 @@ else:
                       help="The model must support tool (function) calling.")
         st.caption("Your key is used only for this session and is not stored. Free option: get a key at "
                    "[OpenRouter](https://openrouter.ai/keys), use the base URL `https://openrouter.ai/api/v1` and a free "
-                   "model such as [nvidia/nemotron-3-super-120b-a12b:free]"
-                   "(https://openrouter.ai/nvidia/nemotron-3-super-120b-a12b:free) "
+                   "model such as [cohere/north-mini-code:free]"
+                   "(https://openrouter.ai/cohere/north-mini-code:free) "
                    "(free models are rate-limited and can be slow).")
 
 # Per-session tool state (it remembers the last search for follow-up questions).

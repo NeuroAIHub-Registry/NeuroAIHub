@@ -42,7 +42,7 @@ links scroll the surrounding Streamlit page to the chat section.
 - Robust to weaker/free models: repairs malformed arguments, reads tool calls written as JSON or XML text, retries
   rate-limit/5xx errors, strips `<think>` blocks, and nudges the model to use the tools if it answers from memory.
 - Requires a model with tool (function) calling. Free option: OpenRouter key, base URL `https://openrouter.ai/api/v1`,
-  model e.g. `nvidia/nemotron-3-super-120b-a12b:free`.
+  model e.g. `cohere/north-mini-code:free`.
 
 ## Editing the database
 
