@@ -196,7 +196,16 @@ class NeuroAIAgent:
                 detail = e.response.json().get("error", {}).get("message", "")
             except Exception:
                 pass
-            result.error = f"The model provider returned an error ({e.status_code}): {detail or e.message}"
+            hints = {
+                401: "The API key was rejected. Check that it is correct and active.",
+                402: "The account has no credit left for this model. Add credit or choose a free model.",
+                403: "This model cannot be used with this key or through this app.",
+                404: ("This model is currently unavailable at its provider (it may have been removed or be down). "
+                      "Please choose another model, e.g. a free one listed at https://openrouter.ai/models?max_price=0"),
+            }
+            result.error = hints.get(e.status_code) or f"The model provider returned an error ({e.status_code}): {detail or e.message}"
+            if e.status_code in hints and detail:
+                result.error += f" (provider message: {detail})"
         except Exception as e:
             result.status = "failed"
             result.error = f"The model provider failed to answer ({e}). Please try again or switch to another model."

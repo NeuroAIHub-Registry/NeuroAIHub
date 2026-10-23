@@ -64,7 +64,7 @@ from neuroaihub import NeuroAIChatAgent
 agent = NeuroAIChatAgent(
     api_key="YOUR_API_KEY",
     base_url="https://openrouter.ai/api/v1",            # leave out for OpenAI
-    model="nvidia/nemotron-3-super-120b-a12b:free"      # e.g. "gpt-5" with OpenAI
+    model="cohere/north-mini-code:free"      # e.g. "gpt-5" with OpenAI
 )
 
 result = agent.chat("I’m planning a deep learning project on brain tumor segmentation. Which datasets would you recommend?")

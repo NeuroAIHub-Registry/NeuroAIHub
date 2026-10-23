@@ -22,7 +22,7 @@ class NeuroAIChatAgent:
     """Chat with the NeuroAIHub database of neuroradiology datasets.
 
     agent = NeuroAIChatAgent(api_key="...", base_url="https://openrouter.ai/api/v1",
-                             model="nvidia/nemotron-3-super-120b-a12b:free")
+                             model="cohere/north-mini-code:free")
     result = agent.chat("Which open glioma MRI datasets have segmentation masks?")
     agent.display(result)
 
@@ -33,7 +33,7 @@ class NeuroAIChatAgent:
     def __init__(self, api_key, base_url=None, model=None, verbose=False, data_dir=None, refresh_data=False):
         if not api_key or not model:
             raise ValueError("api_key and model are required, e.g. model='gpt-5' or "
-                             "model='nvidia/nemotron-3-super-120b-a12b:free' with base_url='https://openrouter.ai/api/v1'")
+                             "model='cohere/north-mini-code:free' with base_url='https://openrouter.ai/api/v1'")
         self.api_key = str(api_key).strip()
         self.base_url = (str(base_url).strip() or None) if base_url else None
         self.model = str(model).strip()
